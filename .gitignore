@@ -2,7 +2,6 @@
 ### Scala template
 *.class
 *.log
-MainApp.scala
 
 # sbt specific
 .cache
