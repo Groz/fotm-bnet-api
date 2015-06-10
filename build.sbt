@@ -4,4 +4,7 @@ version := "0.1"
 
 resolvers += "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/"
 
-libraryDependencies += "com.typesafe.play" %% "play-json" % "2.4.0"
+libraryDependencies ++= Seq(
+  "com.typesafe.play" %% "play-json" % "2.4.0",
+  "com.typesafe.play" %% "play-ws" % "2.4.0"
+)

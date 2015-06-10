@@ -1,13 +1,15 @@
 import info.fotm.api._
+import info.fotm.api.models.{Twos, Appearance, PvP}
+import info.fotm.api.regions.Europe.{RuRU, EsES}
 import info.fotm.api.regions._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import play.api.libs.json.{JsValue, Json}
 
 object MainApp extends App {
-  val api = new Api(Europe, ApiKey("vntnwpsguf4pqak7e8y7tgn35795fqfj"))
+  val api = new BattleNetAPI(Europe, "vntnwpsguf4pqak7e8y7tgn35795fqfj", RuRU).WoW
 
-  val jsonFuture = api.fetchCharacterProfile("Silvermoon", "Armory")
+  val jsonFuture = api.leaderboard(Twos)
 
   val json = Await.result(jsonFuture, Duration.Inf)
   println(json)
