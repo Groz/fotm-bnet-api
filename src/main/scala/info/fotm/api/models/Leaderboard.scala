@@ -45,4 +45,7 @@ case class LeaderboardRow(
   seasonLosses: Int,
   weeklyWins: Int,
   weeklyLosses: Int
-)
+) {
+  def seasonTotal = seasonWins + seasonLosses
+  def weeklyTotal = weeklyWins + weeklyLosses
+}
