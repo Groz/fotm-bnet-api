@@ -1,3 +1,4 @@
+import dispatch.Http
 import info.fotm.api._
 import info.fotm.api.models.{Twos, Appearance, PvP}
 import info.fotm.api.regions.Europe.{RuRU, EsES}
@@ -14,5 +15,7 @@ object MainApp extends App {
 
   val json = Await.result(jsonFuture, Duration.Inf)
   println(json)
+
+  Http.shutdown()
 
 }

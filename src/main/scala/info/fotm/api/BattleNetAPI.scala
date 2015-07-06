@@ -14,11 +14,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = DefaultLocale) { self =>
 
   def fetchJson(relativePath: Seq[String], params: Map[String, String] = Map.empty): Future[JsValue] = {
-    val root = host(region.root).secure
+    val path = (host(region.root) /: relativePath) { _ / _ }
 
-    val path = (root /: relativePath) { _ / _ }
-
-    val req = path <<? (Map("locale" -> locale.code, "apikey" -> key) ++ params)
+    val req = path.secure <<? Map("locale" -> locale.code, "apikey" -> key) <<? params
 
     Http(req OK as.String).map(Json.parse)
   }
