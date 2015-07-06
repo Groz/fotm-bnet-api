@@ -1,29 +1,30 @@
 package info.fotm.api
 
+import dispatch.{host, Http, as}
 import models._
 import regions._
 
 import play.api.libs.json.{Reads, JsValue, Json}
-import scala.concurrent.{Future, blocking}
-import scala.io.Source
+import scala.concurrent.Future
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 // https://dev.battle.net/io-docs
 class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = DefaultLocale) { self =>
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+  def fetchJson(relativePath: Seq[String], params: Map[String, String] = Map.empty): Future[JsValue] = {
+    val root = host(region.root).secure
 
-  def fetchJson(relativePath: String): Future[JsValue] = Future {
-    val delim = if (relativePath.contains("?")) "&" else "?"
-    val url = s"https://${region.root}/$relativePath${delim}locale=${locale.code}&apikey=$key"
+    val path = (root /: relativePath) { _ / _ }
 
-    blocking {
-      val html = Source.fromURL(url, "UTF-8")
-      Json.parse(html.mkString)
-    }
+    val req = path <<? (Map("locale" -> locale.code, "apikey" -> key) ++ params)
+
+    Http(req OK as.String).map(Json.parse)
   }
 
-  def fetch[T](relativePath: String)(implicit reads: Reads[T]): Future[T] = fetchJson(relativePath).map(_.as[T])
+  def fetch[T](relativePaths: Seq[String], params: Map[String, String] = Map.empty)(implicit reads: Reads[T]): Future[T] =
+    fetchJson(relativePaths, params).map(_.as[T])
 
   object WoW {
     lazy implicit val achievementsReads = Json.reads[Achievements]
@@ -36,15 +37,15 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
     def characterProfile(realm: String, characterName: String, fields: List[CharacterProfileField] = Nil): Future[CharacterProfile] = {
       val relativePath = s"/wow/character/$realm/$characterName"
       val fieldString = fields.map(_.code).mkString(",")
-      val path = if (fieldString.isEmpty) relativePath else relativePath+s"?fields=$fieldString"
-      fetch[CharacterProfile](path)
+      val args: Map[String, String] = if (fieldString.isEmpty) Map("fields" -> "fieldString") else Map()
+      fetch[CharacterProfile](Seq("wow", "character", realm, characterName), args)
     }
 
     lazy implicit val leaderboardRowReads = Json.reads[LeaderboardRow]
     lazy implicit val leaderboardsReads = Json.reads[Leaderboard]
 
     def leaderboard(bracket: Bracket): Future[Leaderboard] = {
-      fetch[Leaderboard](s"/wow/leaderboard/${bracket.slug}")
+      fetch[Leaderboard](Seq("wow", "leaderboard", bracket.slug))
     }
   }
 
