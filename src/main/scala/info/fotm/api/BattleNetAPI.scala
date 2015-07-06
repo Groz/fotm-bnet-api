@@ -35,7 +35,7 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
     def characterProfile(realm: String, characterName: String, fields: List[CharacterProfileField] = Nil): Future[CharacterProfile] = {
       val relativePath = s"/wow/character/$realm/$characterName"
       val fieldString = fields.map(_.code).mkString(",")
-      val args: Map[String, String] = if (fieldString.isEmpty) Map("fields" -> "fieldString") else Map()
+      val args: Map[String, String] = if (fieldString.isEmpty) Map("fields" -> fieldString) else Map()
       fetch[CharacterProfile](Seq("wow", "character", realm, characterName), args)
     }
 
