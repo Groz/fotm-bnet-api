@@ -1,8 +1,8 @@
 package info.fotm.api.models
 
-sealed abstract class Region(val root: String)
+sealed abstract class Region(val root: String) extends Serializable
 
-sealed abstract class Locale[+R <: Region](val code: String)
+sealed abstract class Locale[+R <: Region](val code: String) extends Serializable
 case object DefaultLocale extends Locale[Nothing]("en_US")
 
 case object US extends Region("us.api.battle.net") {

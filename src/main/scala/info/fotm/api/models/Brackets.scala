@@ -1,6 +1,6 @@
 package info.fotm.api.models
 
-sealed abstract class Bracket(val size: Int) {
+sealed abstract class Bracket(val size: Int) extends Serializable {
   lazy val slug: String = s"${size}v$size"
 }
 
