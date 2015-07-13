@@ -1,22 +1,38 @@
 package info.fotm.api
 
-import dispatch.{host, Http, as}
 import models._
 
+import java.io.Closeable
+import dispatch.{host, Http, as}
 import play.api.libs.json.{Reads, JsValue, Json}
 import scala.concurrent.Future
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 // https://dev.battle.net/io-docs
-class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = DefaultLocale) { self =>
+class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = DefaultLocale)
+                               (implicit val settings: BattleNetAPISettings)
+  extends Closeable { self =>
 
   def fetchJson(relativePath: Seq[String], params: Map[String, String] = Map.empty): Future[JsValue] = {
     val path = (host(region.root) /: relativePath) { _ / _ }
 
     val req = path.secure <<? Map("locale" -> locale.code, "apikey" -> key) <<? params
 
-    Http(req OK as.String).map(Json.parse)
+    val headers =
+      Map("Accept-Encoding" -> "gzip, deflate") ++
+      (if (!settings.cache) Map(
+        "Cache-Control" -> "no-cache, no-store, must-revalidate",
+        "Pragma" -> "no-cache",
+        "Expires" -> "0"
+        ) else Map.empty) ++
+      settings.userAgent.fold(Map.empty[String, String])(userAgentString => Map("User-Agent" -> userAgentString))
+
+    println(headers)
+
+    val withHeaders = req <:< headers
+
+    Http(withHeaders OK as.String).map(Json.parse)
   }
 
   def fetch[T](relativePaths: Seq[String], params: Map[String, String] = Map.empty)(implicit reads: Reads[T]): Future[T] =
@@ -45,5 +61,5 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
     }
   }
 
+  def close(): Unit = Http.shutdown()
 }
-
