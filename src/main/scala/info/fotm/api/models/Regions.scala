@@ -1,4 +1,4 @@
-package info.fotm.api.regions
+package info.fotm.api.models
 
 sealed abstract class Region(val root: String)
 

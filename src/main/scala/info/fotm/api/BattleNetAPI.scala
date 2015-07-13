@@ -2,13 +2,11 @@ package info.fotm.api
 
 import dispatch.{host, Http, as}
 import models._
-import regions._
 
 import play.api.libs.json.{Reads, JsValue, Json}
 import scala.concurrent.Future
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
 
 // https://dev.battle.net/io-docs
 class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = DefaultLocale) { self =>
@@ -28,7 +26,7 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
     lazy implicit val achievementsReads = Json.reads[Achievements]
     lazy implicit val appearanceReads = Json.reads[Appearance]
     lazy implicit val bracketsInfoReads = Json.reads[BracketInfo]
-    lazy implicit val bracketsReads = Json.reads[Brackets]
+    lazy implicit val bracketsReads = Json.reads[BracketsInfo]
     lazy implicit val pvpReads = Json.reads[PvP]
     lazy implicit val charProfileReads = Json.reads[CharacterProfile]
 

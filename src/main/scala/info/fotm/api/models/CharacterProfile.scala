@@ -97,9 +97,9 @@ case class Appearance(
 
  */
 
-case class PvP(brackets: Brackets)
+case class PvP(brackets: BracketsInfo)
 
-case class Brackets(
+case class BracketsInfo(
                      ARENA_BRACKET_2v2: BracketInfo,
                      ARENA_BRACKET_3v3: BracketInfo,
                      ARENA_BRACKET_5v5: BracketInfo,
