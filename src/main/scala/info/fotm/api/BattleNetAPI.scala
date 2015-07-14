@@ -28,8 +28,6 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
         ) else Map.empty) ++
       settings.userAgent.fold(Map.empty[String, String])(userAgentString => Map("User-Agent" -> userAgentString))
 
-    println(headers)
-
     val withHeaders = req <:< headers
 
     Http(withHeaders OK as.String).map(Json.parse)

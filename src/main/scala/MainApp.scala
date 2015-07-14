@@ -1,4 +1,3 @@
-import dispatch.Http
 import info.fotm.api._
 import info.fotm.api.models._
 import scala.concurrent.Await
