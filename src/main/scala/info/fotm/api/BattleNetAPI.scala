@@ -14,21 +14,23 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
                                (implicit val settings: BattleNetAPISettings)
   extends Closeable { self =>
 
+  val headers = Map("Accept-Encoding" -> "gzip, deflate")
+
+  val noCacheHeaders = Map(
+    "Cache-Control" -> "no-cache, no-store, must-revalidate",
+    "Pragma" -> "no-cache",
+    "Expires" -> "0")
+
   def fetchJson(relativePath: Seq[String], params: Map[String, String] = Map.empty): Future[JsValue] = {
     val path = (host(region.root) /: relativePath) { _ / _ }
 
     val req = path.secure <<? Map("locale" -> locale.code, "apikey" -> key) <<? params
 
-    val headers =
-      Map("Accept-Encoding" -> "gzip, deflate") ++
-      (if (!settings.cache) Map(
-        "Cache-Control" -> "no-cache, no-store, must-revalidate",
-        "Pragma" -> "no-cache",
-        "Expires" -> "0"
-        ) else Map.empty) ++
-      settings.userAgent.fold(Map.empty[String, String])(userAgentString => Map("User-Agent" -> userAgentString))
+    val uaHeader = settings.userAgent.map("User-Agent" -> _)
 
-    val withHeaders = req <:< headers
+    val cacheHeaders = if (!settings.cache) noCacheHeaders else Map.empty
+
+    val withHeaders = req <:< headers <:< uaHeader.toMap <:< cacheHeaders
 
     Http(withHeaders OK as.String).map(Json.parse)
   }
