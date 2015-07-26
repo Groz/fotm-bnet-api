@@ -21,7 +21,9 @@ package info.fotm.api.models
     }, {
 
  */
-case class Leaderboard(rows: List[LeaderboardRow])
+case class Leaderboard(rows: List[LeaderboardRow]) {
+  override def toString = s"Leaderboard(size: ${rows.size})"
+}
 
 case class LeaderboardRow(
   ranking: Int,
