@@ -9,4 +9,3 @@ libraryDependencies ++= Seq(
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.3",
   "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 )
-

@@ -12,7 +12,10 @@ object MainApp extends App {
   while (true) {
     val jsonFuture = api.leaderboard(Twos)
 
-    jsonFuture.onComplete { r => println(r.isSuccess) }
+    jsonFuture.onComplete { r => println(r) }
+    jsonFuture.onSuccess {
+      case lb: Leaderboard => println(lb.rows.size)
+    }
 
     Await.ready(jsonFuture, Duration.Inf)
   }

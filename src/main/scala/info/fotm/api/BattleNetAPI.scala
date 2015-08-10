@@ -1,18 +1,29 @@
 package info.fotm.api
 
-import models._
-
 import java.io.Closeable
-import dispatch.{host, Http, as}
-import play.api.libs.json.{Reads, JsValue, Json}
-import scala.concurrent.Future
+
+import dispatch.{Http, as, host}
+import info.fotm.api.models._
+import play.api.libs.json.{JsValue, Json, Reads}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 // https://dev.battle.net/io-docs
-class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = DefaultLocale)
-                               (implicit val settings: BattleNetAPISettings)
+class BattleNetAPI[R <: Region](
+    region: R,
+    apikey: String,
+    locale: Locale[R] = DefaultLocale,
+    settings: BattleNetAPISettings = BattleNetAPISettings.default)
   extends Closeable { self =>
+
+  val timeoutInMs = settings.timeoutInMs
+
+  val http = Http.configure(_
+    .setConnectTimeout(timeoutInMs)
+    .setReadTimeout(timeoutInMs)
+    .setRequestTimeout(timeoutInMs)
+  )
 
   val headers = Map("Accept-Encoding" -> "gzip, deflate")
 
@@ -24,7 +35,7 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
   def fetchJson(relativePath: Seq[String], params: Map[String, String] = Map.empty): Future[JsValue] = {
     val path = (host(region.root) /: relativePath) { _ / _ }
 
-    val req = path.secure <<? Map("locale" -> locale.code, "apikey" -> key) <<? params
+    val req = path.secure <<? Map("locale" -> locale.code, "apikey" -> apikey) <<? params
 
     val uaHeader = settings.userAgent.map("User-Agent" -> _)
 
@@ -32,7 +43,7 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
 
     val withHeaders = req <:< headers <:< uaHeader.toMap <:< cacheHeaders
 
-    Http(withHeaders OK as.String).map(Json.parse)
+    http(withHeaders OK as.String).map(Json.parse)
   }
 
   def fetch[T](relativePaths: Seq[String], params: Map[String, String] = Map.empty)(implicit reads: Reads[T]): Future[T] =
@@ -61,5 +72,5 @@ class BattleNetAPI[R <: Region](region: R, key: String, locale: Locale[R] = Defa
     }
   }
 
-  def close(): Unit = Http.shutdown()
+  def close(): Unit = http.shutdown()
 }
