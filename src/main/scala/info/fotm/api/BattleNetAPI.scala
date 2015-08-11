@@ -19,12 +19,6 @@ class BattleNetAPI[R <: Region](
 
   val timeoutInMs = settings.timeoutInMs
 
-  val http = Http.configure(_
-    .setConnectTimeout(timeoutInMs)
-    .setReadTimeout(timeoutInMs)
-    .setRequestTimeout(timeoutInMs)
-  )
-
   val headers = Map("Accept-Encoding" -> "gzip, deflate")
 
   val noCacheHeaders = Map(
@@ -43,7 +37,7 @@ class BattleNetAPI[R <: Region](
 
     val withHeaders = req <:< headers <:< uaHeader.toMap <:< cacheHeaders
 
-    http(withHeaders OK as.String).map(Json.parse)
+    settings.http(withHeaders OK as.String).map(Json.parse)
   }
 
   def fetch[T](relativePaths: Seq[String], params: Map[String, String] = Map.empty)(implicit reads: Reads[T]): Future[T] =
@@ -72,5 +66,5 @@ class BattleNetAPI[R <: Region](
     }
   }
 
-  def close(): Unit = http.shutdown()
+  def close(): Unit = {}
 }
