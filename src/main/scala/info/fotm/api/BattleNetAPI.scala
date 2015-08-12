@@ -2,7 +2,7 @@ package info.fotm.api
 
 import java.io.Closeable
 
-import dispatch.{Http, as, host}
+import dispatch.{as, host}
 import info.fotm.api.models._
 import play.api.libs.json.{JsValue, Json, Reads}
 
@@ -66,5 +66,5 @@ class BattleNetAPI[R <: Region](
     }
   }
 
-  def close(): Unit = {}
+  def close(): Unit = settings.http.shutdown()
 }

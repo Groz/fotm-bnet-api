@@ -11,5 +11,5 @@ case class BattleNetAPISettings(userAgent: Option[String], cache: Boolean, timeo
 }
 
 object BattleNetAPISettings {
-  implicit val default = BattleNetAPISettings(Some("Fotm Battle.net API"), cache = false, timeoutInMs = 20 * 1000)
+  implicit val default = BattleNetAPISettings(Some("Fotm Battle.net API"), cache = false, timeoutInMs = 30 * 1000)
 }
